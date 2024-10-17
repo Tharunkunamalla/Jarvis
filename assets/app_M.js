@@ -9,7 +9,7 @@ function speak(text) {
 
   text_speak.rate = 1;
   text_speak.volume = 1; // Volume should be between 0 and 1
-  text_speak.pitch = 1;
+  text_speak.pitch = 1; // Adjust the pitch with some value
 
   window.speechSynthesis.speak(text_speak);
 }
