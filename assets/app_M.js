@@ -1,22 +1,25 @@
-// This is for Male voice assistant
-
 const btn = document.querySelector(".talk");
 const content = document.querySelector(".content");
-let openedWindow = null; // Reference to store the opened window
+let openedWindow = null;
+
+let selectedVoice = null;
 
 function speak(text) {
   const text_speak = new SpeechSynthesisUtterance(text);
 
+  if (selectedVoice) {
+    text_speak.voice = selectedVoice;
+  }
+
   text_speak.rate = 1;
-  text_speak.volume = 1; // Volume should be between 0 and 1
+  text_speak.volume = 1;
   text_speak.pitch = 1;
 
   window.speechSynthesis.speak(text_speak);
 }
 
 function wishMe() {
-  const day = new Date();
-  const hour = day.getHours();
+  const hour = new Date().getHours();
 
   if (hour >= 0 && hour < 12) {
     speak("Good Morning Boss...");
@@ -27,10 +30,22 @@ function wishMe() {
   }
 }
 
-window.addEventListener("load", () => {
+function initVoiceAssistant() {
+  const voices = window.speechSynthesis.getVoices();
+  selectedVoice =
+    voices.find(
+      (voice) =>
+        voice.name.toLowerCase().includes("male") ||
+        voice.name.toLowerCase().includes("english male")
+    ) || voices[0];
+
   speak("Initializing JARVIS...");
   wishMe();
-});
+}
+
+window.speechSynthesis.onvoiceschanged = () => {
+  initVoiceAssistant();
+};
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -55,17 +70,17 @@ function takeCommand(message) {
     message.includes("hii")
   ) {
     speak("Hello Sir, How May I Help You?");
-  } else if (message.includes("can you say about yourself ..")) {
-    speak("Im jarvis , virtual Assistant for Tharun ...");
+  } else if (message.includes("can you say about yourself")) {
+    speak("I'm Jarvis, virtual assistant for Tharun.");
   } else if (message.includes("open google")) {
     openedWindow = window.open("https://google.com", "_blank");
     speak("Opening Google...");
-  } else if (message.includes("open Chat Gpt")) {
+  } else if (message.includes("open chat gpt")) {
     openedWindow = window.open("https://chatgpt.com/?oai-dm=1", "_blank");
-    speak("Opening Chat gpt...");
+    speak("Opening Chat GPT...");
   } else if (message.includes("open youtube")) {
     openedWindow = window.open("https://youtube.com", "_blank");
-    speak("Opening Youtube...");
+    speak("Opening YouTube...");
   } else if (message.includes("open facebook")) {
     openedWindow = window.open("https://facebook.com", "_blank");
     speak("Opening Facebook...");
@@ -75,53 +90,45 @@ function takeCommand(message) {
     message.includes("what are")
   ) {
     openedWindow = window.open(
-      `https://www.google.com/search?q=${message.replace(" ", "+")}`,
+      `https://www.google.com/search?q=${message.replace(/ /g, "+")}`,
       "_blank"
     );
-    const finalText =
-      "This is what I found on the internet regarding " + message;
-    speak(finalText);
+    speak("This is what I found on the internet regarding " + message);
   } else if (message.includes("wikipedia")) {
+    const searchTerm = message.replace("wikipedia", "").trim();
     openedWindow = window.open(
-      `https://en.wikipedia.org/wiki/${message
-        .replace("wikipedia", "")
-        .trim()}`,
+      `https://en.wikipedia.org/wiki/${searchTerm}`,
       "_blank"
     );
-    const finalText = "This is what I found on Wikipedia regarding " + message;
-    speak(finalText);
+    speak("This is what I found on Wikipedia regarding " + searchTerm);
   } else if (message.includes("time")) {
     const time = new Date().toLocaleString(undefined, {
       hour: "numeric",
       minute: "numeric",
     });
-    const finalText = "The current time is " + time;
-    speak(finalText);
+    speak("The current time is " + time);
   } else if (message.includes("date")) {
     const date = new Date().toLocaleString(undefined, {
       month: "short",
       day: "numeric",
     });
-    const finalText = "Today's date is " + date;
-    speak(finalText);
+    speak("Today's date is " + date);
   } else if (message.includes("calculator")) {
     openedWindow = window.open("Calculator:///");
-    const finalText = "Opening Calculator";
-    speak(finalText);
+    speak("Opening Calculator");
   } else if (message.includes("close")) {
     if (openedWindow) {
       speak("Closing the opened window...");
       openedWindow.close();
-      openedWindow = null; // Reset the reference after closing
+      openedWindow = null;
     } else {
       speak("No window is currently open.");
     }
   } else {
     openedWindow = window.open(
-      `https://www.google.com/search?q=${message.replace(" ", "+")}`,
+      `https://www.google.com/search?q=${message.replace(/ /g, "+")}`,
       "_blank"
     );
-    const finalText = "I found some information for " + message + " on Google";
-    speak(finalText);
+    speak("I found some information for " + message + " on Google");
   }
 }
